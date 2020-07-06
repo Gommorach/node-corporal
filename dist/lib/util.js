@@ -131,11 +131,9 @@ class CorporalUtil {
     static _createAutocomplete(session) {
         return (args, callback) => __awaiter(this, void 0, void 0, function* () {
             try {
-                session.stderr().write('\nargs: "' + JSON.stringify(args) + '"\n');
                 args = args.slice();
-                // First handle the case where this is an auto-suggest based on finding the command name
                 const allCommandNames = underscore_1.default.keys(session.commands().get());
-                session.stderr().write('allCommandNames: "' + JSON.stringify(allCommandNames) + '"\n');
+                // First handle the case where this is an auto-suggest based on finding the command name
                 if (underscore_1.default.isEmpty(args)) {
                     if (callback)
                         callback(allCommandNames);
@@ -145,10 +143,8 @@ class CorporalUtil {
                     const matchingCommands = underscore_1.default.filter(allCommandNames, (commandName) => {
                         return (commandName.indexOf(args[0]) === 0);
                     });
-                    session.stderr().write('matchingCommands: "' + JSON.stringify(matchingCommands) + '"\n');
-                    // test this with tab autocompletion with og node-corporal + extra logging
                     if (callback) {
-                        callback(matchingCommands);
+                        callback(null, matchingCommands);
                     }
                     return matchingCommands;
                 }
@@ -157,12 +153,9 @@ class CorporalUtil {
                 const commandName = args.shift();
                 const command = session.commands().get(commandName);
                 if (command && underscore_1.default.isFunction(command.autocomplete)) {
-                    session.stderr().write('autcomplete sync: "' + JSON.stringify({ session, args, callback }) + '"\n');
                     command.autocomplete(session, args, callback);
                 }
                 else if (command && underscore_1.default.isFunction(command.autocompleteAsync)) {
-                    session.stderr().write('autcomplete async .......  \n');
-                    session.stderr().write('autcomplete async: "' + JSON.stringify({ session, args, callback }) + '"\n');
                     return yield command.autocompleteAsync(session, args);
                 }
                 if (callback)

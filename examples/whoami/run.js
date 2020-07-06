@@ -1,8 +1,8 @@
 var colors = require('colors');
 var path = require('path');
 
-var Corporal = require('../../index');
-var corporal = new Corporal({
+var Corporal = require('../../dist/index');
+var corporal = new Corporal.default({
 
     // Commands will be loaded from JS files in the "commands" directory. Each command
     // exports an object that contains data and functions for describing and invoking

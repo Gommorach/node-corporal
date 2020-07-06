@@ -31,7 +31,6 @@
     },
     "include": [
         "index.ts",
-        "run.ts",
         "commands/**/*.ts",
         "lib/**/*.ts",
         "tests/**/*.ts",
