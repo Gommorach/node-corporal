@@ -1,5 +1,5 @@
 module.exports = function(grunt) {
-    var mocha_grep = process.env.MOCHA_GREP || undefined;
+    let mocha_grep = process.env.MOCHA_GREP || undefined;
 
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-release');

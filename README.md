@@ -31,7 +31,7 @@ Corporal is initialized with a constructor, which takes in an options object. On
 
 ```javascript
 var Corporal = require('corporal');
-var corporal = new Corporal({'commands': __dirname + '/commands'});
+var corporal = new Corporal({ commands: __dirname + '/commands'});
 corporal.on('load', corporal.loop);
 ```
 
@@ -138,7 +138,7 @@ Rather than declare all commands in a single file, load a directory full of Java
 
 ```javascript
 var Corporal = require('corporal');
-new Corporal({'commands': __dirname + '/commands'}).loop();
+new Corporal({ commands: __dirname + '/commands'}).loop();
 ```
 
 ### Error handling

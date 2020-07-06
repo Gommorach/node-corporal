@@ -1,5 +1,10 @@
-var _ = require('underscore');
-var sprintf = require('sprintf-js').sprintf;
+import _ from "underscore";
+import {sprintf} from "sprintf-js";
+
+import {usage} from "optimist";
+import CorporalSession from "../lib/session";
+import { WriteStream } from "tty";
+import { Command } from '../types/command';
 
 /**
  * Help command.
@@ -15,30 +20,28 @@ var sprintf = require('sprintf-js').sprintf;
  *                      if the user executes `help clear`, the help content for clear will still
  *                      be displayed. This setting only impacts the help list index.
  */
-module.exports = {
-    'description': _getDescription(),
-    'help': sprintf('Usage: %s', _getOptimist().help()),
-    'init': function(session, callback) {
-        var allSettings = session.env('corporal_command_settings');
-        var helpSettings = allSettings.help = _.isObject(allSettings.help) ?
+export default {
+    description: _getDescription(),
+    help: sprintf('Usage: %s', _getOptimist().help()),
+    init: async (session: CorporalSession) => {
+        const allSettings = session.env('corporal_command_settings');
+        const helpSettings = allSettings.help = _.isObject(allSettings.help) ?
             allSettings.help : {};
 
         // Ensure the `hide` setting is set in the help settings
         helpSettings.hide = (_.isArray(helpSettings.hide)) ? helpSettings.hide : [];
-
-        return callback();
     },
-    'invoke': function(session, args, callback) {
-        var argv = _getOptimist().parse(args);
-        var commandName = argv._[0];
+    invoke: async (session: CorporalSession, args: any) => {
+        const argv = _getOptimist().parse(args);
+        const commandName = argv._[0];
 
         // A hidden ability of the `help` command is to output standard output on
         // stderr. Really only useful for API-level interaction, so it's not
         // advertised in the user-facing help
-        var out = (argv['stderr']) ? session.stderr() : session.stdout();
+        const out: WriteStream = (argv['stderr']) ? session.stderr() : session.stdout();
 
         if (commandName) {
-            var command = session.commands().get(commandName);
+            const command = session.commands().get(commandName);
             if (command) {
                 out.write('\n');
                 out.write(command.description + '\n');
@@ -57,17 +60,17 @@ module.exports = {
             out.write('List of available commands:\n');
             out.write('\n');
 
-            var settings = session.env('corporal_command_settings').help;
+            const settings = session.env('corporal_command_settings').help;
 
             // Determine the width of the command name column
-            var longestNameLength = 0;
+            let longestNameLength = 0;
             _.chain(session.commands().get())
                 .keys()
                 .difference(settings.hide)
                 .map(function(commandName) {
                     return commandName.length;
                 })
-                .each(function(currentLength) {
+                .each((currentLength) => {
                     longestNameLength = Math.max(currentLength, longestNameLength);
                 });
 
@@ -75,44 +78,33 @@ module.exports = {
             _.chain(session.commands().get())
                 .keys()
                 .difference(settings.hide)
-                .each(function(commandName) {
-                    var command = session.commands().get(commandName);
+                .each((commandName) => {
+                    const command = session.commands().get(commandName);
                     out.write(sprintf('%-' + longestNameLength + 's:  %s', commandName, command.description.split('\n')[0]));
                     out.write('\n');
                 });
 
             out.write('\n');
         }
-
-        return callback();
     },
-    'autocomplete': function(session, args, callback) {
+    autocomplete: async (session: CorporalSession, args: any) => {
         if (args.length !== 1) {
-            return callback();
+            return;
         }
 
         // Filter by command names
-        return callback(null, _.chain(session.commands().get())
-            .keys()
-            .filter(function(commandName) {
+        return _.chain(session.commands().get()).keys()
+            .filter(commandName => {
                 return (commandName.indexOf(args[0]) === 0);
             })
-            .value());
+            .value();
     }
-};
+} as Command;
 
 function _getDescription() {
     return 'Show a dialog of all available commands.';
 }
 
 function _getOptimist() {
-    return require('optimist').usage('help [<command>]');
-}
-
-function _getSettings(session) {
-    var env = session.env();
-
-    var settings = _.extend({}, session.env('help'));
-    settings = (_.isArray(settings.hide)) ? settings.hide : [];
-    return settings;
+    return usage('help [<command>]');
 }
